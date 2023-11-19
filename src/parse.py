@@ -1,4 +1,7 @@
 import load_activities
+
+import re
+import unicodedata
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
 
@@ -24,9 +27,17 @@ class Attribute(Enum):
     distance = 'distance'
     elevation_gain = 'total_elevation_gain'
     avg_heartrate = 'average_heartrate'
+    moving_time = 'moving_time'
+    average_speed = 'average_speed'
 
     def __str__(self):
         return self.value
+
+
+def strip_accents(string):
+   """Remove local nonunicode chars(č -> c) for better name matching."""
+   return ''.join(c for c in unicodedata.normalize('NFD', string)
+                  if unicodedata.category(c) != 'Mn')
 
 
 def pretty_print(data):
@@ -92,23 +103,43 @@ def sort_by_attr(data, sort_arg):
     return data
 
 
+def match_name(data, pattern):
+    filtered_data = []
+    for activity in data:
+        stripped_name = strip_accents(activity['name'])
+        if re.match(pattern, stripped_name, flags=re.IGNORECASE):
+            filtered_data.append(activity)
+    return filtered_data
+
+
 if __name__ == '__main__':
     argparser = ArgumentParser(description=f"""Filter strava activities by your parameters.
 Available attributes to filter by: {list(Attribute.__members__)}""",
                                formatter_class=RawTextHelpFormatter)
     argparser.add_argument('--type', type=ActivityType, choices=list(ActivityType), 
                            help='filter by specific activity type', nargs='*', action='extend')
-    argparser.add_argument('-d', '--distance', type=str, help='set the distance filters[m]')
+    argparser.add_argument('--name', type=str, 
+                           help='filter by keywords present in activity name')
+    argparser.add_argument('-d', '--distance', type=str,
+                           help='set the distance filters[m]')
     argparser.add_argument('-eg', '--elevation_gain', type=str, 
                            help='set the elevation gain filter[m]')
     argparser.add_argument('-hr', '--avg_heartrate', type=str, 
                            help='set the average heartrate filter[bpm]')
+    argparser.add_argument('-sp', '--average_speed', type=str, 
+                           help='set the average speed filter[m/s]')
+    argparser.add_argument('-t', '--moving_time', type=str, 
+                           help='set the moving time filter[s]')
     argparser.add_argument('--sortby', type=str, 
                            help="Sort by specific attribute and order: 'attribute_name:[desc/asc]'")
+    #TODO: flag na limit poctu vysledkov
 
     args = argparser.parse_args()
 
     data = load_activities.load()
+
+    if args.name:
+        data = match_name(data, args.name)
 
     if args.type:
         data = filter_activity_types(data, args.type)
