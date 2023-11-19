@@ -58,13 +58,10 @@ def pretty_print(data):
     
     
 def validate_attr_filters(filters):
-    filters = filters.split(' ')
-    if len(filters) % 2 != 0:
-        raise Exception("Filters are expected to come in pairs of symbols and values.")
-    
     parsed_filters = []
-    for symbol, value in list(zip(filters[::2], filters[1::2])):
-        if symbol not in ['>', '<', '=', '>=', '<=']:
+    for filter in filters:
+        symbol, value = filter.split(' ')
+        if symbol not in ['>', '<', '==', '>=', '<=']:
             raise Exception(f'Incorrect equality symbol: {symbol}.')
         try:
             value = float(value)
@@ -74,15 +71,14 @@ def validate_attr_filters(filters):
     return parsed_filters
 
 
-def apply_attr_filters(data, attribute, filters):
+def apply_attr_filters(data, attribute, filter):
     filtered_data = []
-    for filter in filters:
-        for activity in data:
-            try:
-                if eval(f'{activity[attribute]} {filter['symbol']} {filter['value']}'):
-                    filtered_data.append(activity)
-            except KeyError:
-                continue
+    for activity in data:
+        try:
+            if eval(f'{activity[attribute]} {filter['symbol']} {filter['value']}'):
+                filtered_data.append(activity)
+        except KeyError:
+            continue
     return filtered_data
 
 
@@ -114,24 +110,27 @@ def match_name(data, pattern):
 
 if __name__ == '__main__':
     argparser = ArgumentParser(description=f"""Filter strava activities by your parameters.
-Available attributes to filter by: {list(Attribute.__members__)}""",
+All attribute filters are specified as \"symbol value\" string where symbol is one of [>, <, ==, >=, <=]
+Available attributes to filter by: {list(Attribute.__members__)}
+Available activity types: {list(ActivityType.__members__)}""",
                                formatter_class=RawTextHelpFormatter)
-    argparser.add_argument('--type', type=ActivityType, choices=list(ActivityType), 
-                           help='filter by specific activity type', nargs='*', action='extend')
     argparser.add_argument('--name', type=str, 
                            help='filter by keywords present in activity name')
-    argparser.add_argument('-d', '--distance', type=str,
-                           help='set the distance filters[m]')
-    argparser.add_argument('-eg', '--elevation_gain', type=str, 
-                           help='set the elevation gain filter[m]')
-    argparser.add_argument('-hr', '--avg_heartrate', type=str, 
-                           help='set the average heartrate filter[bpm]')
-    argparser.add_argument('-sp', '--average_speed', type=str, 
-                           help='set the average speed filter[m/s]')
-    argparser.add_argument('-t', '--moving_time', type=str, 
-                           help='set the moving time filter[s]')
+    argparser.add_argument('--type', type=ActivityType, choices=list(ActivityType), 
+                           help='filter by specific activity type', nargs='*', action='extend')
     argparser.add_argument('--sortby', type=str, 
                            help="Sort by specific attribute and order: 'attribute_name:[desc/asc]'")
+    attr_group = argparser.add_argument_group('Attribute filters')
+    attr_group.add_argument('-d', '--distance', type=str, nargs='*', action='extend',
+                           help='set the distance filters[m]')
+    attr_group.add_argument('-eg', '--elevation_gain', type=str, nargs='*', action='extend',
+                           help='set the elevation gain filter[m]')
+    attr_group.add_argument('-hr', '--avg_heartrate', type=str, nargs='*', action='extend',
+                           help='set the average heartrate filter[bpm]')
+    attr_group.add_argument('-sp', '--average_speed', type=str, nargs='*', action='extend',
+                           help='set the average speed filter[m/s]')
+    attr_group.add_argument('-t', '--moving_time', type=str, nargs='*', action='extend',
+                           help='set the moving time filter[s]')
     #TODO: flag na limit poctu vysledkov
 
     args = argparser.parse_args()
@@ -150,7 +149,8 @@ Available attributes to filter by: {list(Attribute.__members__)}""",
             continue
         attribute = Attribute[attribute].value
         filters = validate_attr_filters(filters)
-        data = apply_attr_filters(data, attribute, filters)
+        for filter in filters:
+            data = apply_attr_filters(data, attribute, filter)
     
     if args.sortby:
         data = sort_by_attr(data, args.sortby)
