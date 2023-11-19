@@ -1,5 +1,6 @@
 import load_activities
 
+import datetime
 import re
 import unicodedata
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -43,7 +44,7 @@ def strip_accents(string):
 def pretty_print(data):
     print(f"Total acitivities: {len(data)}")
     for activity in data:
-        console.print(f"[bold][red]{activity['name']}: \
+        console.print(f"[bold][red]{activity['name']} [{activity['type']}] \
 [blue]https://strava.com/activities/{activity['id']}")
         attributes = f"  -  [bold]distance[/bold]: "
         attributes += f"[green]{round(float(activity['distance'])/1000, 2)}km[/green], "
@@ -54,6 +55,10 @@ def pretty_print(data):
             attributes += f"[green]{activity['average_heartrate']}bpm[/green] "
         except:
             attributes += "None"
+        attributes += f"\n  -  [bold]moving time[/bold]: "
+        attributes += f"[green]{datetime.timedelta(seconds=activity['moving_time'])}[/green], "
+        attributes += f"[bold]average speed[/bold]: "
+        attributes += f"[green]{round(activity['average_speed']*3.6, 2)}km/h[/green], "
         console.print(attributes, highlight=False)
     
     
@@ -120,6 +125,8 @@ Available activity types: {list(ActivityType.__members__)}""",
                            help='filter by specific activity type', nargs='*', action='extend')
     argparser.add_argument('--sortby', type=str, 
                            help="Sort by specific attribute and order: 'attribute_name:[desc/asc]'")
+    argparser.add_argument('-l', '--limit', type=int, 
+                           help='limit output to number of results')
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-d', '--distance', type=str, nargs='*', action='extend',
                            help='set the distance filters[m]')
@@ -131,7 +138,7 @@ Available activity types: {list(ActivityType.__members__)}""",
                            help='set the average speed filter[m/s]')
     attr_group.add_argument('-t', '--moving_time', type=str, nargs='*', action='extend',
                            help='set the moving time filter[s]')
-    #TODO: flag na limit poctu vysledkov
+    #TODO: add pace
 
     args = argparser.parse_args()
 
@@ -155,5 +162,7 @@ Available activity types: {list(ActivityType.__members__)}""",
     if args.sortby:
         data = sort_by_attr(data, args.sortby)
         
+    if args.limit:
+        data = data[0:args.limit]
     
     pretty_print(data)
