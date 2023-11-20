@@ -1,6 +1,5 @@
 import load_activities
 
-import datetime
 import re
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
