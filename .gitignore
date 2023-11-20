@@ -162,3 +162,4 @@ cython_debug/
 local_config.json
 *.pickle
 activities/
+.idea
