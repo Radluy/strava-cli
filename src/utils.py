@@ -1,8 +1,10 @@
 import datetime
+import re
 import unicodedata
 
 
-def format_time(date):
+def parse_datetime(date):
+    """Load datetime by format used in the API."""
     return datetime.datetime.strptime(date, '%Y-%m-%dT%H:%M:%SZ')
 
 
@@ -22,15 +24,21 @@ def speed_to_pace(speed):
 
 
 def format_value(attr, value):
+    """Predefined formatters for undesired values in strava data."""
     if attr == 'distance':
         return value / 1000
     elif attr == 'average_speed':
         return value * 3.6
     elif attr == 'average_pace':
         return speed_to_pace(value)
+    else:
+        return value
 
 
 def pace_from_string(filter_val):
+    """Load pace as timedelta from string specified as cli argument by user."""
+    if not re.match(r"[0-5]?\d:[0-5]\d", filter_val):
+        raise ValueError(f"Incorrect pace specified: {filter_val}")
     dt = datetime.datetime.strptime(filter_val, "%M:%S")
     delta = datetime.timedelta(minutes=dt.minute, seconds=dt.second)
     return delta

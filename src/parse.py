@@ -42,7 +42,7 @@ def pretty_print(data):
         console.print(f"[bold][red]{activity['name']} [{activity['type']}] \
 [blue]https://strava.com/activities/{activity['id']}")
         attributes = f"  -  [bold]date[/bold]: "
-        attributes += f"[green]{format_time(activity['start_date'])}[/green], "
+        attributes += f"[green]{parse_datetime(activity['start_date'])}[/green], "
         attributes += f"[bold]distance[/bold]: "
         attributes += f"[green]{round(float(activity['distance']) / 1000, 2)}km[/green], "
         attributes += f"[bold]moving time[/bold]: "
@@ -147,7 +147,7 @@ def parse_cli_args():
     attr_group.add_argument('-t', '--moving_time', type=str, nargs='*', action='extend',
                             help='set the moving time filter[s], e.g.: \'< 3600\'')
     attr_group.add_argument('-pc', '--average_pace', type=str, nargs='*', action='extend',
-                            help='set the average pace filter[min/km], e.g.: \'< 5:30\'')
+                            help='set the average pace filter[mm:ss/km], e.g.: \'< 05:30\'')
 
     return argparser.parse_args()
 
