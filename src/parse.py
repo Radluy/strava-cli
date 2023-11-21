@@ -1,3 +1,5 @@
+import datetime
+
 import load_activities
 
 import re
@@ -6,7 +8,7 @@ from enum import Enum
 
 from rich.console import Console
 
-from utils import *
+from utils import pace_from_string, parse_datetime, speed_to_pace, strip_accents, format_value
 
 console = Console()
 
@@ -41,22 +43,22 @@ def pretty_print(data):
     for activity in data:
         console.print(f"[bold][red]{activity['name']} [{activity['type']}] \
 [blue]https://strava.com/activities/{activity['id']}")
-        attributes = f"  -  [bold]date[/bold]: "
+        attributes = "  -  [bold]date[/bold]: "
         attributes += f"[green]{parse_datetime(activity['start_date'])}[/green], "
-        attributes += f"[bold]distance[/bold]: "
+        attributes += "[bold]distance[/bold]: "
         attributes += f"[green]{round(float(activity['distance']) / 1000, 2)}km[/green], "
-        attributes += f"[bold]moving time[/bold]: "
+        attributes += "[bold]moving time[/bold]: "
         attributes += f"[green]{datetime.timedelta(seconds=activity['moving_time'])}[/green], "
-        attributes += f"\n  -  [bold]elevation gain[/bold]: "
+        attributes += "\n  -  [bold]elevation gain[/bold]: "
         attributes += f"[green]{activity['total_elevation_gain']}m[/green], "
-        attributes += f"[bold]avg heartrate[/bold]: "
+        attributes += "[bold]avg heartrate[/bold]: "
         try:
             attributes += f"[green]{activity['average_heartrate']}bpm[/green], "
-        except:
+        except KeyError:
             attributes += "None, "
-        attributes += f"[bold]avg speed[/bold]: "
+        attributes += "[bold]avg speed[/bold]: "
         attributes += f"[green]{round(activity['average_speed']*3.6, 2)}km/h[/green], "
-        attributes += f"\n  -  [bold]avg pace[/bold]: "
+        attributes += "\n  -  [bold]avg pace[/bold]: "
         attributes += f"[green]{speed_to_pace(activity['average_speed'])}min/km[/green]"
         console.print(attributes, highlight=False)
 
@@ -96,8 +98,7 @@ def apply_attr_filters(data, attribute, filter):
 
 
 def filter_activity_types(data, types):
-    type_filters = [f.value for f in types]
-    data = [activity for activity in data if activity['type'] in type_filters]
+    data = [activity for activity in data if activity['type'] in types]
     return data
 
 
@@ -123,13 +124,15 @@ def match_name(data, pattern):
 
 def parse_cli_args():
     argparser = ArgumentParser(description=f"""Filter strava activities by your parameters.
-    All attribute filters are specified as \"symbol value\" string where symbol is one of [>, <, ==, >=, <=]
-    Available attributes to filter by: {list(Attribute.__members__)}
-    Available activity types: {list(ActivityType.__members__)}""",
+All attribute filters are specified as \"symbol value\" \
+string where symbol is one of [>, <, ==, >=, <=]
+Available attributes to filter by: {list(Attribute.__members__)}
+Available activity types: {[act.value for act in ActivityType]}""",
                                formatter_class=RawTextHelpFormatter)
     argparser.add_argument('--name', type=str,
                            help='filter by keywords present in activity name')
-    argparser.add_argument('--type', type=ActivityType, choices=list(ActivityType),
+    argparser.add_argument('--type', type=str.lower,
+                           choices=[t.value.lower() for t in ActivityType],
                            help='filter by specific activity type', nargs='*', action='extend')
     argparser.add_argument('--sortby', type=str,
                            help="Sort by specific attribute and order: 'attribute_name:[desc/asc]'")

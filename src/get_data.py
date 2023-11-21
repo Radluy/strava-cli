@@ -1,21 +1,22 @@
-import requests 
+import requests
 import json
 import pickle
 import time
 import os
 
+
 with open('config.json', 'r') as f:
     config = json.load(f)
+STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
+
 
 def get_access_token():
-    STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
-
     if not os.path.exists('access_token.pickle'):
-        refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token', 
-                                            data={'client_id': STRAVA_CLIENT_ID,
-                                            'client_secret': STRAVA_CLIENT_SECRET,
-                                            'grant_type': 'authorization_code',
-                                            'code': config['code']})
+        refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
+                                         data={'client_id': STRAVA_CLIENT_ID,
+                                               'client_secret': STRAVA_CLIENT_SECRET,
+                                               'grant_type': 'authorization_code',
+                                               'code': config['code']})
         access_token = refresh_response.json()
         print(access_token)
         with open('access_token.pickle', 'wb') as f:
@@ -23,23 +24,23 @@ def get_access_token():
         print('First token saved to file')
     else:
         with open('access_token.pickle', 'rb') as f:
-            access_token = pickle.load(f) 
+            access_token = pickle.load(f)
         print('Latest access token read from file:')
         print(access_token)
 
         if time.time() > access_token['expires_at']:
             print('Token has expired, will refresh')
-            refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token', 
-                                            data={'client_id': STRAVA_CLIENT_ID,
-                                            'client_secret': STRAVA_CLIENT_SECRET,
-                                            'grant_type': 'refresh_token',
-                                            'refresh_token': access_token['refresh_token']})
+            refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
+                                             data={'client_id': STRAVA_CLIENT_ID,
+                                                   'client_secret': STRAVA_CLIENT_SECRET,
+                                                   'grant_type': 'refresh_token',
+                                                   'refresh_token': access_token['refresh_token']})
             access_token = refresh_response.json()
             print(access_token)
             with open('access_token.pickle', 'wb') as f:
                 pickle.dump(access_token, f)
             print('Refreshed token saved to file')
-            
+
     return access_token
 
 
@@ -52,7 +53,7 @@ def download():
             os.remove(file_path)
     else:
         os.mkdir('activities')
-        
+
     index = 0
     finished = False
     while not finished:

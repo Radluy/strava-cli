@@ -1,9 +1,8 @@
 import json
 import os
-import get_data
 
 
-def load(): 
+def load():
     files = os.listdir('activities')
     data = []
     for file in files:
