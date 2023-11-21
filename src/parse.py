@@ -44,7 +44,7 @@ def pretty_print(data):
         console.print(f"[bold][red]{activity['name']} [{activity['type']}] \
 [blue]https://strava.com/activities/{activity['id']}")
         attributes = "  -  [bold]date[/bold]: "
-        attributes += f"[green]{parse_datetime(activity['start_date'])}[/green], "
+        attributes += f"[green]{parse_datetime(activity['start_date_local'])}[/green], "
         attributes += "[bold]distance[/bold]: "
         attributes += f"[green]{round(float(activity['distance']) / 1000, 2)}km[/green], "
         attributes += "[bold]moving time[/bold]: "
@@ -98,7 +98,7 @@ def apply_attr_filters(data, attribute, filter):
 
 
 def filter_activity_types(data, types):
-    data = [activity for activity in data if activity['type'] in types]
+    data = [activity for activity in data if activity['type'].lower() in types]
     return data
 
 
@@ -171,8 +171,8 @@ if __name__ == '__main__':
             continue
         attribute = Attribute[attribute].value
         filters = validate_attr_filters(filters)
-        for filter in filters:
-            data = apply_attr_filters(data, attribute, filter)
+        for filtr in filters:
+            data = apply_attr_filters(data, attribute, filtr)
 
     if args.sortby:
         data = sort_by_attr(data, args.sortby)

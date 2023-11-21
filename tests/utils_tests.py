@@ -99,7 +99,5 @@ class TestFormatValue(unittest.TestCase):
         self.assertEqual(result.seconds, 142)
 
 
-
-
 if __name__ == '__main__':
     unittest.main()
