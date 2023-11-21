@@ -53,6 +53,10 @@ class TestPaceFromString(unittest.TestCase):
         pace = 5.3
         self.assertRaises(TypeError, utils.pace_from_string, pace)
 
+    def test_pace_random_str(self):
+        pace = 'abc'
+        self.assertRaises(ValueError, utils.pace_from_string, pace)
+
     def test_pace_as_timedelta(self):
         pace = datetime.timedelta(minutes=5, seconds=20)
         self.assertRaises(TypeError, utils.pace_from_string, pace)

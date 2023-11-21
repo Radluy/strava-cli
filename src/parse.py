@@ -1,14 +1,14 @@
 import datetime
-
-import load_activities
-
 import re
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
 
 from rich.console import Console
 
-from utils import pace_from_string, parse_datetime, speed_to_pace, strip_accents, format_value
+from load_activities import load
+from utils import pace_from_string, parse_datetime, \
+                             speed_to_pace, strip_accents, format_value
+
 
 console = Console()
 
@@ -63,21 +63,24 @@ def pretty_print(data):
         console.print(attributes, highlight=False)
 
 
-def validate_attr_filters(filters):
-    parsed_filters = []
-    for filter in filters:
-        symbol, value = filter.split(' ')
-        if symbol not in ['>', '<', '==', '>=', '<=']:
-            raise Exception(f'Incorrect equality symbol: {symbol}.')
-        try:
-            if attribute == 'average_pace':
-                value = pace_from_string(value)
-            else:
-                value = float(value)
-        except ValueError:
-            raise Exception(f'Specified value: {value} is not correct.')
-        parsed_filters.append({'symbol': symbol, 'value': value})
-    return parsed_filters
+def validate_attr_filter(filtr):
+    """Make sure that attribute based filter specified by user is in correct format.
+    (symbol:value) where symbol is from [>, <, ==, <=, >=] and value is float or pace[mm:ss]"""
+    try:
+        symbol, value = filtr.split(' ')
+    except ValueError:
+        raise ValueError(f"Incorrect attribute filter specified: {filtr}, "
+                         f"maybe a missing space between symbol and value")
+    if symbol not in ['>', '<', '==', '>=', '<=']:
+        raise ValueError(f'Incorrect equality symbol: {symbol}.')
+    try:
+        if ':' in value:
+            value = pace_from_string(value)
+        else:
+            value = float(value)
+    except ValueError:
+        raise ValueError(f'Specified value: {value} is not correct.')
+    return {'symbol': symbol, 'value': value}
 
 
 def apply_attr_filters(data, attribute, filter):
@@ -157,7 +160,7 @@ Available activity types: {[act.value for act in ActivityType]}""",
 
 if __name__ == '__main__':
     args = parse_cli_args()
-    data = load_activities.load()
+    data = load()
 
     if args.name:
         data = match_name(data, args.name)
@@ -170,7 +173,7 @@ if __name__ == '__main__':
         if filters is None or attribute not in Attribute.__members__:
             continue
         attribute = Attribute[attribute].value
-        filters = validate_attr_filters(filters)
+        filters = [validate_attr_filter(filtr) for filtr in filters]
         for filtr in filters:
             data = apply_attr_filters(data, attribute, filtr)
 
