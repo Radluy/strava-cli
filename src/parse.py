@@ -21,6 +21,7 @@ class ActivityType(Enum):
     rock_climbing = 'RockClimbing'
     nordic_ski = 'NordicSki'
     alpine_ski = 'AlpineSki'
+    weight_training = 'WeightTraining'
 
     def __str__(self):
         return self.value
@@ -65,7 +66,7 @@ def pretty_print(data):
 
 def validate_attr_filter(filtr):
     """Make sure that attribute based filter specified by user is in correct format.
-    (symbol:value) where symbol is from [>, <, ==, <=, >=] and value is float or pace[mm:ss]"""
+    (symbol:value) where symbol is from [>, <, ==, <=, >=] and value is float or pace[mm:ss]."""
     try:
         symbol, value = filtr.split(' ')
     except ValueError:
@@ -83,15 +84,17 @@ def validate_attr_filter(filtr):
     return {'symbol': symbol, 'value': value}
 
 
-def apply_attr_filters(data, attribute, filter):
+def apply_attr_filters(data, attribute, filtr):
+    """Filter activities by specified attribute filters.
+    E.g.: attribute 'distance', filter: '> 10'."""
     filtered_data = []
     for activity in data:
         activity['average_pace'] = activity['average_speed']
         value = format_value(attribute, activity[attribute])
         if attribute == 'average_pace':
-            condition = f"\"{value}\" {filter['symbol']} \"{filter['value']}\""
+            condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
         else:
-            condition = f"{value} {filter['symbol']} {filter['value']}"
+            condition = f"{value} {filtr['symbol']} {filtr['value']}"
         try:
             if eval(condition):
                 filtered_data.append(activity)
@@ -101,22 +104,29 @@ def apply_attr_filters(data, attribute, filter):
 
 
 def filter_activity_types(data, types):
+    """Filter list of activities by specific activity types, one or more."""
     data = [activity for activity in data if activity['type'].lower() in types]
     return data
 
 
 def sort_by_attr(data, sort_arg):
+    """Sort activities by specified attribute and order in format 'attribute:[asc/desc]'."""
+    if ':' not in sort_arg:
+        raise ValueError("Sorting argument should be in format 'attribute:[asc/desc]'")
     attribute, order = sort_arg.split(':')
+    if order not in ['asc', 'desc']:
+        raise ValueError("Sorting order should be either asc:desc")
     try:
         attribute = Attribute[attribute].value
-    except KeyError:
-        raise Exception(f"Incorrect attribute specified in sortby: {attribute}")
+    except KeyError as e:
+        raise KeyError(f"Incorrect attribute specified in sortby: {attribute}") from e
     reverse_order = (order.lower() == 'desc')
     data = sorted(data, key=lambda x: x[attribute], reverse=reverse_order)
     return data
 
 
 def match_name(data, pattern):
+    """Filter list of activities by matching a part or the whole name of activity."""
     filtered_data = []
     for activity in data:
         stripped_name = strip_accents(activity['name'])
