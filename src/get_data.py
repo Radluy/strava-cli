@@ -5,7 +5,7 @@ import time
 import os
 
 
-with open('local_config.json', 'r') as f:
+with open('config.json', 'r') as f:
     config = json.load(f)
 STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
 
