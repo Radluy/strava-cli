@@ -1,7 +1,7 @@
-from authorize import authorize
-from get_data import download
-from load_activities import load
-from utils import pace_from_string, parse_datetime, \
+from src.authorize import authorize
+from src.get_data import download
+from src.load_activities import load
+from src.utils import pace_from_string, parse_datetime, \
                              speed_to_pace, strip_accents, format_value
 
 import datetime

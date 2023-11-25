@@ -40,12 +40,12 @@ def get_access_token():
 def download():
     access_token = get_access_token()
 
-    if os.path.exists('activities'):
-        for filename in os.listdir('activities'):
-            file_path = os.path.join(os.getcwd(), 'activities', filename)
+    if os.path.exists('/tmp/strava-cli-activities'):
+        for filename in os.listdir('/tmp/strava-cli-activities'):
+            file_path = os.path.join('/tmp/strava-cli-activities', filename)
             os.remove(file_path)
     else:
-        os.mkdir('activities')
+        os.mkdir('/tmp/strava-cli-activities')
 
     index = 0
     finished = False
@@ -57,7 +57,7 @@ def download():
         if response.text == '[]' or index == 10:
             finished = True
             continue
-        with open(f"activities/activities_{index}.json", 'w') as f:
+        with open(f"/tmp/strava-cli-activities/activities_{index}.json", 'w') as f:
             json.dump(response.json(), f)
 
     print("Download successful")
