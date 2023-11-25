@@ -1,13 +1,15 @@
+from authorize import authorize
+from get_data import download
+from load_activities import load
+from utils import pace_from_string, parse_datetime, \
+                             speed_to_pace, strip_accents, format_value
+
 import datetime
 import re
 from argparse import ArgumentParser, RawTextHelpFormatter
 from enum import Enum
 
 from rich.console import Console
-
-from load_activities import load
-from utils import pace_from_string, parse_datetime, \
-                             speed_to_pace, strip_accents, format_value
 
 
 console = Console()
@@ -142,15 +144,21 @@ string where symbol is one of [>, <, ==, >=, <=]
 Available attributes to filter by: {list(Attribute.__members__)}
 Available activity types: {[act.value for act in ActivityType]}""",
                                formatter_class=RawTextHelpFormatter)
-    argparser.add_argument('--name', type=str,
-                           help='filter by keywords present in activity name')
-    argparser.add_argument('--type', type=str.lower,
-                           choices=[t.value.lower() for t in ActivityType],
-                           help='filter by specific activity type', nargs='*', action='extend')
-    argparser.add_argument('--sortby', type=str,
-                           help="Sort by specific attribute and order: 'attribute_name:[desc/asc]'")
-    argparser.add_argument('-l', '--limit', type=int,
-                           help='limit output to number of results')
+    subparser = argparser.add_subparsers(title="Subcommands", dest="subcommand",
+                                         help="Available subcommands")
+    subparser.add_parser("authorize", help="Authorize app to access data")
+    subparser.add_parser("download", help="Download activity data")
+    basic_group = argparser.add_argument_group('Basic filters')
+    basic_group.add_argument('--name', type=str,
+                             help='filter by keywords present in activity name')
+    basic_group.add_argument('--type', type=str.lower,
+                             choices=[t.value.lower() for t in ActivityType],
+                             help='filter by specific activity type', nargs='*', action='extend')
+    basic_group.add_argument('--sortby', type=str,
+                             help="Sort by specific attribute and order: "
+                                  "'attribute_name:[desc/asc]'")
+    basic_group.add_argument('-l', '--limit', type=int,
+                             help='limit output to number of results')
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-d', '--distance', type=str, nargs='*', action='extend',
                             help='set the distance filters[km], e.g.: \'> 90\'')
@@ -168,8 +176,15 @@ Available activity types: {[act.value for act in ActivityType]}""",
     return argparser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     args = parse_cli_args()
+    if args.subcommand == 'authorize':
+        authorize()
+        return
+    elif args.subcommand == 'download':
+        download()
+        return
+
     data = load()
 
     if args.name:
@@ -194,3 +209,7 @@ if __name__ == '__main__':
         data = data[0:args.limit]
 
     pretty_print(data)
+
+
+if __name__ == '__main__':
+    main()
