@@ -160,6 +160,7 @@ cython_debug/
 #.idea/
 
 local_config.json
+config.json
 *.pickle
 activities/
 .idea

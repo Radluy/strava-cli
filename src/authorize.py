@@ -16,7 +16,7 @@ def authorize():
 
     server_socket.listen(1)
 
-    with open('local_config.json', 'r') as f:
+    with open('config.json', 'r') as f:
         conf = json.load(f)
     print("Please open this link and authorize the app to access your strava data:")
     print(f"http://www.strava.com/oauth/authorize?client_id={conf['client_id']}"
@@ -36,7 +36,7 @@ def authorize():
             print('authorization failed!')
             break
         conf['code'] = code
-        with open('local_config.json', 'w') as f:
+        with open('config.json', 'w') as f:
             json.dump(conf, f)
         print("Authorization successful.")
         break
