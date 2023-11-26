@@ -4,24 +4,26 @@ import pickle
 import time
 import os
 
+from src import CONFIG_PATH, ACCESS_TOKEN, ACTIVITIES_DIR
 
-with open('config.json', 'r') as f:
+
+with open(CONFIG_PATH, 'r') as f:
     config = json.load(f)
 STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
 
 
 def get_access_token():
-    if not os.path.exists('access_token.pickle'):
+    if not os.path.exists(ACCESS_TOKEN):
         refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
                                          data={'client_id': STRAVA_CLIENT_ID,
                                                'client_secret': STRAVA_CLIENT_SECRET,
                                                'grant_type': 'authorization_code',
                                                'code': config['code']})
         access_token = refresh_response.json()
-        with open('access_token.pickle', 'wb') as f:
+        with open(ACCESS_TOKEN, 'wb') as f:
             pickle.dump(access_token, f)
     else:
-        with open('access_token.pickle', 'rb') as f:
+        with open(ACCESS_TOKEN, 'rb') as f:
             access_token = pickle.load(f)
 
         if time.time() > access_token['expires_at']:
@@ -31,7 +33,7 @@ def get_access_token():
                                                    'grant_type': 'refresh_token',
                                                    'refresh_token': access_token['refresh_token']})
             access_token = refresh_response.json()
-            with open('access_token.pickle', 'wb') as f:
+            with open(ACCESS_TOKEN, 'wb') as f:
                 pickle.dump(access_token, f)
 
     return access_token
@@ -40,12 +42,12 @@ def get_access_token():
 def download():
     access_token = get_access_token()
 
-    if os.path.exists('/tmp/strava-cli-activities'):
-        for filename in os.listdir('/tmp/strava-cli-activities'):
-            file_path = os.path.join('/tmp/strava-cli-activities', filename)
+    if os.path.exists(ACTIVITIES_DIR):
+        for filename in os.listdir(ACTIVITIES_DIR):
+            file_path = os.path.join(ACTIVITIES_DIR, filename)
             os.remove(file_path)
     else:
-        os.mkdir('/tmp/strava-cli-activities')
+        os.mkdir(ACTIVITIES_DIR)
 
     index = 0
     finished = False
@@ -57,7 +59,7 @@ def download():
         if response.text == '[]' or index == 10:
             finished = True
             continue
-        with open(f"/tmp/strava-cli-activities/activities_{index}.json", 'w') as f:
+        with open(os.path.join(ACTIVITIES_DIR, f"activities_{index}.json"), 'w') as f:
             json.dump(response.json(), f)
 
     print("Download successful")

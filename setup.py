@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='strava_cli',
+    name='strava-cli',
     version='0.1',
     packages=find_packages(),
     install_requires=[
@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'strava_cli=src.parse:main',
+            'strava-cli=src.parse:main',
         ],
     },
 )

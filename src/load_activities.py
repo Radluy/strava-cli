@@ -1,15 +1,17 @@
 import json
 import os
 
+from src import ACTIVITIES_DIR
+
 
 def load():
-    if (not os.path.exists('/tmp/strava-cli-activities') or
-            len(os.listdir('/tmp/strava-cli-activities')) == 0):
+    if (not os.path.exists(ACTIVITIES_DIR) or
+            len(os.listdir(ACTIVITIES_DIR)) == 0):
         raise FileNotFoundError('activities directory empty or does not exist.')
-    files = os.listdir('/tmp/strava-cli-activities')
+    files = os.listdir(ACTIVITIES_DIR)
     data = []
     for file in files:
-        file = os.path.join('/tmp/strava-cli-activities', file)
+        file = os.path.join(ACTIVITIES_DIR, file)
         with open(file, 'r') as f:
             activities = json.load(f)
         data.extend(activities)

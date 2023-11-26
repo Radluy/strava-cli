@@ -3,10 +3,12 @@ import os
 import socket
 import re
 
+from src import CONFIG_PATH, ACCESS_TOKEN
+
 
 def authorize():
-    if os.path.exists('access_token.pickle'):
-        os.remove('access_token.pickle')
+    if os.path.exists(ACCESS_TOKEN):
+        os.remove(ACCESS_TOKEN)
 
     host = '127.0.0.1'
     port = 8080
@@ -16,7 +18,7 @@ def authorize():
 
     server_socket.listen(1)
 
-    with open('config.json', 'r') as f:
+    with open(CONFIG_PATH, 'r') as f:
         conf = json.load(f)
     print("Please open this link and authorize the app to access your strava data:")
     print(f"http://www.strava.com/oauth/authorize?client_id={conf['client_id']}"
@@ -36,7 +38,7 @@ def authorize():
             print('authorization failed!')
             break
         conf['code'] = code
-        with open('config.json', 'w') as f:
+        with open(CONFIG_PATH, 'w') as f:
             json.dump(conf, f)
         print("Authorization successful.")
         break
