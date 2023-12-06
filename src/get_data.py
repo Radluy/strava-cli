@@ -7,12 +7,11 @@ import os
 from src import CONFIG_PATH, ACCESS_TOKEN, ACTIVITIES_DIR
 
 
-with open(CONFIG_PATH, 'r') as f:
-    config = json.load(f)
-STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
-
-
 def get_access_token():
+    with open(CONFIG_PATH, 'r') as f:
+        config = json.load(f)
+    STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
+
     if not os.path.exists(ACCESS_TOKEN):
         refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
                                          data={'client_id': STRAVA_CLIENT_ID,

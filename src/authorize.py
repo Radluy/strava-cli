@@ -3,10 +3,19 @@ import os
 import socket
 import re
 
-from src import CONFIG_PATH, ACCESS_TOKEN
+from src import CONFIG_PATH, ACCESS_TOKEN, ROOT_DIR
 
 
 def authorize():
+    if not os.path.exists(ROOT_DIR):
+        os.mkdir(ROOT_DIR)
+        default_conf = {"client_id": 123, "client_secret": "abc", "code": "abc"}
+        with open(CONFIG_PATH, 'w') as f:
+            json.dump(default_conf, f)
+        print(f"Please create new Strava App on the "
+              f"webpage and fill in your client data to: {CONFIG_PATH}")
+        return
+
     if os.path.exists(ACCESS_TOKEN):
         os.remove(ACCESS_TOKEN)
 

@@ -10,7 +10,7 @@ build:
 	python -m build --sdist --wheel
 
 install: build
-	python -m pip install dist/strava_cli-0.1-py3-none-any.whl
+	python -m pip install --no-binary :all: dist/strava-cli-0.1.tar.gz
 
 clean:
 	rm -rf build/ dist/ strava-cli.egg-info
