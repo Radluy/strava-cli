@@ -10,12 +10,12 @@ from src import CONFIG_PATH, ACCESS_TOKEN, ACTIVITIES_DIR
 def get_access_token():
     with open(CONFIG_PATH, 'r') as f:
         config = json.load(f)
-    STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET = config['client_id'], config['client_secret']
+    client_id, client_secret = config['client_id'], config['client_secret']
 
     if not os.path.exists(ACCESS_TOKEN):
         refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
-                                         data={'client_id': STRAVA_CLIENT_ID,
-                                               'client_secret': STRAVA_CLIENT_SECRET,
+                                         data={'client_id': client_id,
+                                               'client_secret': client_secret,
                                                'grant_type': 'authorization_code',
                                                'code': config['code']})
         access_token = refresh_response.json()
@@ -27,8 +27,8 @@ def get_access_token():
 
         if time.time() > access_token['expires_at']:
             refresh_response = requests.post(url='https://www.strava.com/api/v3/oauth/token',
-                                             data={'client_id': STRAVA_CLIENT_ID,
-                                                   'client_secret': STRAVA_CLIENT_SECRET,
+                                             data={'client_id': client_id,
+                                                   'client_secret': client_secret,
                                                    'grant_type': 'refresh_token',
                                                    'refresh_token': access_token['refresh_token']})
             access_token = refresh_response.json()
@@ -40,13 +40,10 @@ def get_access_token():
 
 def download():
     access_token = get_access_token()
-
     if os.path.exists(ACTIVITIES_DIR):
         for filename in os.listdir(ACTIVITIES_DIR):
             file_path = os.path.join(ACTIVITIES_DIR, filename)
             os.remove(file_path)
-    else:
-        os.mkdir(ACTIVITIES_DIR)
 
     index = 0
     finished = False

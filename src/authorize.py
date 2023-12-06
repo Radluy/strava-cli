@@ -3,17 +3,35 @@ import os
 import socket
 import re
 
-from src import CONFIG_PATH, ACCESS_TOKEN, ROOT_DIR
+from src import CONFIG_PATH, ACCESS_TOKEN, ROOT_DIR, ACTIVITIES_DIR, USER_CONFIG_DIR
+
+
+def create_file_structure():
+    if not os.path.exists(USER_CONFIG_DIR):
+        os.mkdir(USER_CONFIG_DIR)
+
+    os.mkdir(ROOT_DIR)
+    default_conf = {"client_id": 123, "client_secret": "abc", "code": "abc"}
+    with open(CONFIG_PATH, 'w') as f:
+        json.dump(default_conf, f)
+
+    os.mkdir(ACTIVITIES_DIR)
+    print(f"Please create new Strava App on the "
+          f"webpage and fill in your client data to: {CONFIG_PATH}. Rerun the authorize command.")
 
 
 def authorize():
     if not os.path.exists(ROOT_DIR):
-        os.mkdir(ROOT_DIR)
-        default_conf = {"client_id": 123, "client_secret": "abc", "code": "abc"}
-        with open(CONFIG_PATH, 'w') as f:
-            json.dump(default_conf, f)
+        create_file_structure()
+        return
+
+    with open(CONFIG_PATH, 'r') as f:
+        conf = json.load(f)
+
+    if conf['client_id'] == 123:
         print(f"Please create new Strava App on the "
-              f"webpage and fill in your client data to: {CONFIG_PATH}")
+              f"webpage and fill in your client data to: {CONFIG_PATH}. "
+              f"Rerun the authorize command afterwards.")
         return
 
     if os.path.exists(ACCESS_TOKEN):
@@ -27,8 +45,6 @@ def authorize():
 
     server_socket.listen(1)
 
-    with open(CONFIG_PATH, 'r') as f:
-        conf = json.load(f)
     print("Please open this link and authorize the app to access your strava data:")
     print(f"http://www.strava.com/oauth/authorize?client_id={conf['client_id']}"
           "&response_type=code&redirect_uri=http://localhost:8080&approval_prompt=force"
