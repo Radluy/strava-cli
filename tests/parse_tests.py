@@ -5,11 +5,13 @@ import sys
 sys.path.append('src')
 
 from src import parse  # noqa: E402
+from src.utils import add_pace_attribute
 
 
 def load_example_data():
     with open('tests/example_data.json') as f:
         data = json.load(f)
+    data = add_pace_attribute(data)
     return data
 
 
