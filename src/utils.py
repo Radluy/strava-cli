@@ -31,6 +31,8 @@ def format_value(attr, value):
         return value * 3.6
     elif attr == 'average_pace':
         return speed_to_pace(value)
+    elif attr == 'start_date_local':
+        return parse_datetime(value).date()
     else:
         return value
 

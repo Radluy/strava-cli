@@ -36,6 +36,7 @@ class Attribute(Enum):
     moving_time = 'moving_time'
     average_speed = 'average_speed'
     average_pace = 'average_pace'
+    date = 'start_date_local'
 
     def __str__(self):
         return self.value
@@ -77,7 +78,9 @@ def validate_attr_filter(filtr):
     if symbol not in ['>', '<', '==', '>=', '<=']:
         raise ValueError(f'Incorrect equality symbol: {symbol}.')
     try:
-        if ':' in value:
+        if '-' in value:
+            value = datetime.datetime.strptime(value, '%Y-%m-%d').date()
+        elif ':' in value:
             value = pace_from_string(value)
         else:
             value = float(value)
@@ -93,7 +96,7 @@ def apply_attr_filters(data, attribute, filtr):
     for activity in data:
         activity['average_pace'] = activity['average_speed']
         value = format_value(attribute, activity[attribute])
-        if attribute == 'average_pace':
+        if attribute == 'average_pace' or 'start_date_local':
             condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
         else:
             condition = f"{value} {filtr['symbol']} {filtr['value']}"
@@ -160,8 +163,10 @@ Available activity types: {[act.value for act in ActivityType]}""",
     basic_group.add_argument('-l', '--limit', type=int,
                              help='limit output to number of results')
     attr_group = argparser.add_argument_group('Attribute filters')
-    attr_group.add_argument('-d', '--distance', type=str, nargs='*', action='extend',
+    attr_group.add_argument('-dis', '--distance', type=str, nargs='*', action='extend',
                             help='set the distance filters[km], e.g.: \'> 90\'')
+    attr_group.add_argument('-dat', '--date', type=str, nargs='*', action='extend',
+                            help='set the date filters[YYYY-MM-DD], e.g.: \'> 2023-12-06\'')
     attr_group.add_argument('-eg', '--elevation_gain', type=str, nargs='*', action='extend',
                             help='set the elevation gain filter[m], e.g.: \'> 1000\'')
     attr_group.add_argument('-hr', '--avg_heartrate', type=str, nargs='*', action='extend',
