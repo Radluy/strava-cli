@@ -1,73 +1,16 @@
+from src import ActivityType, Attribute
 from src.authorize import authorize
 from src.get_data import download
 from src.load_activities import load
-from src.utils import pace_from_string, parse_datetime, \
-                             speed_to_pace, strip_accents, format_value
+from src.printer import pprint
+from src.utils import pace_from_string, strip_accents, format_value, timedelta_from_string
 
 import datetime
 import re
 from argparse import ArgumentParser, RawTextHelpFormatter
-from enum import Enum
-
-from rich.console import Console
 
 
-console = Console()
-
-
-class ActivityType(Enum):
-    run = 'Run'
-    ride = 'Ride'
-    hike = 'Hike'
-    workout = 'Workout'
-    rock_climbing = 'RockClimbing'
-    nordic_ski = 'NordicSki'
-    alpine_ski = 'AlpineSki'
-    weight_training = 'WeightTraining'
-
-    def __str__(self):
-        return self.value
-
-
-class Attribute(Enum):
-    distance = 'distance'
-    elevation_gain = 'total_elevation_gain'
-    avg_heartrate = 'average_heartrate'
-    moving_time = 'moving_time'
-    average_speed = 'average_speed'
-    average_pace = 'average_pace'
-    date = 'start_date_local'
-
-    def __str__(self):
-        return self.value
-
-
-def pretty_print(data):
-    print(f"Total acitivities: {len(data)}")
-    for activity in data:
-        console.print(f"[bold][red]{activity['name']} [{activity['type']}] \
-[blue]https://strava.com/activities/{activity['id']}")
-        attributes = "  -  [bold]date[/bold]: "
-        attributes += f"[green]{parse_datetime(activity['start_date_local'])}[/green], "
-        attributes += "[bold]distance[/bold]: "
-        attributes += f"[green]{round(float(activity['distance']) / 1000, 2)}km[/green], "
-        attributes += "[bold]moving time[/bold]: "
-        attributes += f"[green]{datetime.timedelta(seconds=activity['moving_time'])}[/green], "
-        attributes += "\n  -  [bold]elevation gain[/bold]: "
-        attributes += f"[green]{activity['total_elevation_gain']}m[/green], "
-        attributes += "[bold]avg heartrate[/bold]: "
-        try:
-            attributes += f"[green]{activity['average_heartrate']}bpm[/green], "
-        except KeyError:
-            attributes += "None, "
-        attributes += "[bold]avg speed[/bold]: "
-        attributes += f"[green]{round(activity['average_speed']*3.6, 2)}km/h[/green], "
-        attributes += "\n  -  [bold]avg pace[/bold]: "
-        attributes += f"[green]{speed_to_pace(activity['average_speed'])}min/km[/green]"
-        console.print(attributes, highlight=False)
-
-
-def validate_attr_filter(filtr):
+def validate_attr_filter(filtr, attribute):
     """Make sure that attribute based filter specified by user is in correct format.
     (symbol:value) where symbol is from [>, <, ==, <=, >=] and value is float or pace[mm:ss]."""
     try:
@@ -78,10 +21,12 @@ def validate_attr_filter(filtr):
     if symbol not in ['>', '<', '==', '>=', '<=']:
         raise ValueError(f'Incorrect equality symbol: {symbol}.')
     try:
-        if '-' in value:
+        if attribute == "start_date_local":
             value = datetime.datetime.strptime(value, '%Y-%m-%d').date()
-        elif ':' in value:
+        elif attribute == "average_pace":
             value = pace_from_string(value)
+        elif attribute == "moving_time":
+            timedelta_from_string(value)
         else:
             value = float(value)
     except ValueError:
@@ -96,7 +41,7 @@ def apply_attr_filters(data, attribute, filtr):
     for activity in data:
         activity['average_pace'] = activity['average_speed']
         value = format_value(attribute, activity[attribute])
-        if attribute == 'average_pace' or 'start_date_local':
+        if attribute == 'average_pace' or 'start_date_local' or 'moving_time':
             condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
         else:
             condition = f"{value} {filtr['symbol']} {filtr['value']}"
@@ -203,7 +148,7 @@ def main():
         if filters is None or attribute not in Attribute.__members__:
             continue
         attribute = Attribute[attribute].value
-        filters = [validate_attr_filter(filtr) for filtr in filters]
+        filters = [validate_attr_filter(filtr, attribute) for filtr in filters]
         for filtr in filters:
             data = apply_attr_filters(data, attribute, filtr)
 
@@ -213,7 +158,7 @@ def main():
     if args.limit:
         data = data[0:args.limit]
 
-    pretty_print(data)
+    pprint(data)
 
 
 if __name__ == '__main__':

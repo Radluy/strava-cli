@@ -26,13 +26,15 @@ def speed_to_pace(speed):
 def format_value(attr, value):
     """Predefined formatters for undesired values in strava data."""
     if attr == 'distance':
-        return value / 1000
+        return round(value / 1000, 2)
     elif attr == 'average_speed':
-        return value * 3.6
+        return round(value * 3.6, 2)
     elif attr == 'average_pace':
         return speed_to_pace(value)
     elif attr == 'start_date_local':
         return parse_datetime(value).date()
+    elif attr == 'moving_time':
+        return datetime.timedelta(seconds=value)
     else:
         return value
 
@@ -43,4 +45,10 @@ def pace_from_string(filter_val):
         raise ValueError(f"Incorrect pace specified: {filter_val}")
     dt = datetime.datetime.strptime(filter_val, "%M:%S")
     delta = datetime.timedelta(minutes=dt.minute, seconds=dt.second)
+    return delta
+
+
+def timedelta_from_string(filter_val):
+    dt = datetime.datetime.strptime(filter_val, "%H:%M:%S")
+    delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)
     return delta
