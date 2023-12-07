@@ -12,5 +12,10 @@ build:
 install: build
 	python -m pip install --no-binary :all: dist/strava-cli-0.1.tar.gz
 
+binary:
+	pyinstaller --noconfirm src/parse.py
+	mv dist/parse/parse dist/parse/strava-cli
+	mv dist/parse dist/binary
+
 clean:
 	rm -rf build/ dist/ strava-cli.egg-info

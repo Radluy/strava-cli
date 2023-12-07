@@ -102,11 +102,11 @@ Available activity types: {[act.value for act in ActivityType]}""",
     basic_group.add_argument('--type', type=str.lower,
                              choices=[t.value.lower() for t in ActivityType],
                              help='filter by specific activity type', nargs='*', action='extend')
+    basic_group.add_argument('-l', '--limit', type=int,
+                             help='limit output to number of results')
     basic_group.add_argument('--sortby', type=str,
                              help="Sort by specific attribute and order: "
                                   "'attribute_name:[desc/asc]'")
-    basic_group.add_argument('-l', '--limit', type=int,
-                             help='limit output to number of results')
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-dis', '--distance', type=str, nargs='*', action='extend',
                             help='set the distance filters[km], e.g.: \'> 90\'')
@@ -114,7 +114,7 @@ Available activity types: {[act.value for act in ActivityType]}""",
                             help='set the date filters[YYYY-MM-DD], e.g.: \'> 2023-12-06\'')
     attr_group.add_argument('-eg', '--elevation_gain', type=str, nargs='*', action='extend',
                             help='set the elevation gain filter[m], e.g.: \'> 1000\'')
-    attr_group.add_argument('-hr', '--avg_heartrate', type=str, nargs='*', action='extend',
+    attr_group.add_argument('-hr', '--average_heartrate', type=str, nargs='*', action='extend',
                             help='set the average heartrate filter[bpm], e.g.: \'== 160\'')
     attr_group.add_argument('-sp', '--average_speed', type=str, nargs='*', action='extend',
                             help='set the average speed filter[km/h], e.g.: \'>= 25\'')

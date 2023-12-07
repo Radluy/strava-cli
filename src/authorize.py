@@ -30,7 +30,8 @@ def authorize():
 
     if conf['client_id'] == 123:
         print(f"Please create new Strava App on the "
-              f"webpage and fill in your client data to: {CONFIG_PATH}. "
+              f"webpage https://strava.com/settings/api"
+              f"and fill in your client data to: {CONFIG_PATH}. "
               f"Rerun the authorize command afterwards.")
         return
 
