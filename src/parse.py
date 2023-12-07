@@ -41,7 +41,7 @@ def apply_attr_filters(data, attribute, filtr):
     for activity in data:
         activity['average_pace'] = activity['average_speed']
         value = format_value(attribute, activity[attribute])
-        if attribute == 'average_pace' or 'start_date_local' or 'moving_time':
+        if attribute in ['average_pace', 'start_date_local', 'moving_time']:
             condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
         else:
             condition = f"{value} {filtr['symbol']} {filtr['value']}"
