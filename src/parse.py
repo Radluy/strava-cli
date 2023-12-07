@@ -3,7 +3,8 @@ from src.authorize import authorize
 from src.get_data import download
 from src.load_activities import load
 from src.printer import pprint
-from src.utils import pace_from_string, strip_accents, format_value, timedelta_from_string
+from src.utils import pace_from_string, strip_accents, \
+    format_value, timedelta_from_string, add_pace_attribute
 
 import datetime
 import re
@@ -39,7 +40,6 @@ def apply_attr_filters(data, attribute, filtr):
     E.g.: attribute 'distance', filter: '> 10'."""
     filtered_data = []
     for activity in data:
-        activity['average_pace'] = activity['average_speed']
         value = format_value(attribute, activity[attribute])
         if attribute in ['average_pace', 'start_date_local', 'moving_time']:
             condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
@@ -71,6 +71,8 @@ def sort_by_attr(data, sort_arg):
     except KeyError as e:
         raise KeyError(f"Incorrect attribute specified in sortby: {attribute}") from e
     reverse_order = (order.lower() == 'desc')
+    # remove data with missing attribute
+    data = [activity for activity in data if activity.get(attribute)]
     data = sorted(data, key=lambda x: x[attribute], reverse=reverse_order)
     return data
 
@@ -136,6 +138,7 @@ def main():
         return
 
     data = load()
+    data = add_pace_attribute(data)
 
     if args.name:
         data = match_name(data, args.name)

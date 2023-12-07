@@ -52,3 +52,11 @@ def timedelta_from_string(filter_val):
     dt = datetime.datetime.strptime(filter_val, "%H:%M:%S")
     delta = datetime.timedelta(hours=dt.hour, minutes=dt.minute, seconds=dt.second)
     return delta
+
+
+def add_pace_attribute(data):
+    data_with_pace = []
+    for activity in data:
+        activity['average_pace'] = activity['average_speed']
+        data_with_pace.append(activity)
+    return data_with_pace

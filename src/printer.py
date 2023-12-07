@@ -44,7 +44,6 @@ def pprint(data):
         for attr in Attribute.__members__:
             if attr == "date":
                 continue
-            activity['average_pace'] = activity['average_speed']
             try:
                 value = format_value(attr, activity[Attribute[attr].value])
             except KeyError:
