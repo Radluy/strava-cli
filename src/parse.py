@@ -27,7 +27,7 @@ def validate_attr_filter(filtr, attribute):
         elif attribute == "average_pace":
             value = pace_from_string(value)
         elif attribute == "moving_time":
-            timedelta_from_string(value)
+            value = timedelta_from_string(value)
         else:
             value = float(value)
     except ValueError:
@@ -35,21 +35,33 @@ def validate_attr_filter(filtr, attribute):
     return {'symbol': symbol, 'value': value}
 
 
+def generate_condition(value, filtr):
+    """"""
+    if filtr['symbol'] == '>':
+        return value > filtr['value']
+    elif filtr['symbol'] == '>=':
+        return value >= filtr['value']
+    elif filtr['symbol'] == '==':
+        return value == filtr['value']
+    elif filtr['symbol'] == '<=':
+        return value <= filtr['value']
+    elif filtr['symbol'] == '<':
+        return value < filtr['value']
+
+
 def apply_attr_filters(data, attribute, filtr):
     """Filter activities by specified attribute filters.
     E.g.: attribute 'distance', filter: '> 10'."""
     filtered_data = []
     for activity in data:
-        value = format_value(attribute, activity[attribute])
-        if attribute in ['average_pace', 'start_date_local', 'moving_time']:
-            condition = f"\"{value}\" {filtr['symbol']} \"{filtr['value']}\""
-        else:
-            condition = f"{value} {filtr['symbol']} {filtr['value']}"
+        if attribute not in Attribute.list():
+            raise KeyError("Incorrect attribute specified.")
         try:
-            if eval(condition):
-                filtered_data.append(activity)
+            value = format_value(attribute, activity[attribute])
         except KeyError:
             continue
+        if generate_condition(value, filtr):
+            filtered_data.append(activity)
     return filtered_data
 
 

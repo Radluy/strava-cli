@@ -17,7 +17,7 @@ def strip_accents(string):
 def speed_to_pace(speed):
     """Calculate running pace from speed [m/s -> min/km]."""
     if speed == 0:
-        return speed
+        return datetime.timedelta(seconds=0)
     pace = 60 / (speed * 3.6)
     pace_timedelta = datetime.timedelta(minutes=pace)
     return pace_timedelta - datetime.timedelta(microseconds=pace_timedelta.microseconds)

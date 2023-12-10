@@ -1,11 +1,11 @@
+from src import parse  # noqa: E402
+from src.utils import add_pace_attribute, parse_datetime
+
 import datetime
 import json
 import unittest
 import sys
 sys.path.append('src')
-
-from src import parse  # noqa: E402
-from src.utils import add_pace_attribute
 
 
 def load_example_data():
@@ -102,19 +102,19 @@ class TestApplyAttrFilters(unittest.TestCase):
     def test_incorrect_attr(self):
         data = load_example_data()
         attr = 'incorrect_attr'
-        filter = {'symbol': '>', 'value': '10'}
+        filter = {'symbol': '>', 'value': 10}
         self.assertRaises(KeyError, parse.apply_attr_filters, data, attr, filter)
 
     def test_empty_data(self):
         attr = 'distance'
-        filter = {'symbol': '>', 'value': '10'}
+        filter = {'symbol': '>', 'value': 10}
         result = parse.apply_attr_filters([], attr, filter)
         self.assertEqual(len(result), 0)
 
     def test_filter_distance_attr(self):
         data = load_example_data()
         attr = 'distance'
-        filter = {'symbol': '>', 'value': '24'}
+        filter = {'symbol': '>', 'value': 24}
         filtered_data = parse.apply_attr_filters(data, attr, filter)
         self.assertEqual(len(filtered_data), 1)
         self.assertEqual(filtered_data[0]['name'], 'Happy Friday')
@@ -135,6 +135,24 @@ class TestApplyAttrFilters(unittest.TestCase):
         filter = {'symbol': '<', 'value': value}
         filtered_data = parse.apply_attr_filters(data, attr, filter)
         self.assertEqual(len(filtered_data), 2)
+
+    def test_filter_date(self):
+        data = load_example_data()
+        attr = 'start_date_local'
+        value = datetime.date(year=2018, month=5, day=1)
+        filter = {'symbol': '>', 'value': value}
+        filtered_data = parse.apply_attr_filters(data, attr, filter)
+        self.assertEqual(len(filtered_data), 1)
+        self.assertEqual(filtered_data[0]['name'], 'Happy Friday')
+
+    def test_filter_moving_time(self):
+        data = load_example_data()
+        attr = 'moving_time'
+        value = datetime.timedelta(seconds=4500)
+        filter = {'symbol': '==', 'value': value}
+        filtered_data = parse.apply_attr_filters(data, attr, filter)
+        self.assertEqual(len(filtered_data), 1)
+        self.assertEqual(filtered_data[0]['name'], 'Happy Friday')
 
 
 class TestSortByAttr(unittest.TestCase):
@@ -189,6 +207,14 @@ class TestSortByAttr(unittest.TestCase):
         sort_arg = 'average_pace:desc'
         sorted_data = parse.sort_by_attr(data, sort_arg)
         self.assertGreaterEqual(sorted_data[0]['average_pace'], sorted_data[1]['average_pace'])
+
+    def test_sort_date_desc(self):
+        data = load_example_data()
+        sort_arg = 'date:desc'
+        sorted_data = parse.sort_by_attr(data, sort_arg)
+        arg1 = parse_datetime(sorted_data[0]['start_date_local'])
+        arg2 = parse_datetime(sorted_data[1]['start_date_local'])
+        self.assertGreaterEqual(arg1, arg2)
 
 
 if __name__ == '__main__':
