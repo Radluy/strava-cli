@@ -36,7 +36,7 @@ class TestSpeedToPace(unittest.TestCase):
     def test_zero_speed(self):
         speed = 0
         result = utils.speed_to_pace(speed)
-        self.assertEqual(result, 0)
+        self.assertEqual(result, datetime.timedelta(seconds=0))
 
     def test_non_int(self):
         speed = 'abc'
