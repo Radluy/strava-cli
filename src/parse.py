@@ -94,7 +94,7 @@ def match_name(data, pattern):
     filtered_data = []
     for activity in data:
         stripped_name = strip_accents(activity['name'])
-        if re.match(pattern, stripped_name, flags=re.IGNORECASE):
+        if re.search(pattern, stripped_name, flags=re.IGNORECASE):
             filtered_data.append(activity)
     return filtered_data
 
