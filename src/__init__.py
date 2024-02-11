@@ -35,7 +35,7 @@ class Attribute(Enum):
 
     def __str__(self):
         return self.value
-    
+
     @classmethod
     def list(cls):
         return list(map(lambda c: c.value, cls))

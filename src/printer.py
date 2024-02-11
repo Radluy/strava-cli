@@ -1,8 +1,9 @@
 from src.utils import parse_datetime, format_value
+from src.stats import weekly_stats, generate_weekly_ranges
 from src import Attribute, Units
 
 from rich.console import Console
-
+from rich.table import Table
 
 MAIN_COLOR = "#C45016"
 SECOND_COLOR = "#C47C16"
@@ -29,6 +30,24 @@ def main_color(text):
 
 def color(text, color):
     return f"[{color}]{text}[/{color}]"
+
+
+def weekly_table(data, num_weeks=4):
+    ranges = generate_weekly_ranges(num_weeks)
+    stats = weekly_stats(data, num_weeks)
+
+    table = Table(show_header=True, header_style="bold", show_lines=True, row_styles=["dim", ""])
+    table.add_column("Week")
+    table.add_column("Moving time")
+    table.add_column("Distance")
+    table.add_column("Elevation")
+    for week, stat in zip(ranges, stats):
+        table.add_row(f"{week['start'].strftime("%d %b %Y")} - {week['end'].strftime("%d %b %Y")}",
+                      f"{stat['moving_time']} h",
+                      f"{stat['covered_distance']} km",
+                      f"{stat['covered_elevation']} m")
+
+    console.print(table)
 
 
 def pprint(data):

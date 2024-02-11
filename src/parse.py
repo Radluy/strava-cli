@@ -2,7 +2,7 @@ from src import ActivityType, Attribute
 from src.authorize import authorize
 from src.get_data import download
 from src.load_activities import load
-from src.printer import pprint
+from src.printer import pprint, weekly_table
 from src.utils import pace_from_string, strip_accents, \
     format_value, timedelta_from_string, add_pace_attribute
 
@@ -121,6 +121,8 @@ Available activity types: {[act.value for act in ActivityType]}""",
     basic_group.add_argument('--sortby', type=str,
                              help="Sort by specific attribute and order: "
                                   "'attribute_name:[desc/asc]'")
+    basic_group.add_argument('--weekly', default=False, action='store_true',
+                             help="Print weekly statistics")
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-dis', '--distance', type=str, nargs='*', action='extend',
                             help='set the distance filters[km], e.g.: \'> 90\'')
@@ -173,7 +175,10 @@ def main():
     if args.limit:
         data = data[0:args.limit]
 
-    pprint(data)
+    if args.weekly:
+        weekly_table(data)
+    else:
+        pprint(data)
 
 
 if __name__ == '__main__':
