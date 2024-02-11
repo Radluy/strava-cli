@@ -42,7 +42,7 @@ def weekly_table(data, num_weeks=4):
     table.add_column("Distance")
     table.add_column("Elevation")
     for week, stat in zip(ranges, stats):
-        table.add_row(f"{week['start'].strftime("%d %b %Y")} - {week['end'].strftime("%d %b %Y")}",
+        table.add_row(f"{week['start'].strftime('%d %b %Y')} - {week['end'].strftime('%d %b %Y')}",
                       f"{stat['moving_time']} h",
                       f"{stat['covered_distance']} km",
                       f"{stat['covered_elevation']} m")

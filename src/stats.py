@@ -4,7 +4,6 @@ from src.utils import format_value
 
 
 def calculate_stats(data):
-    """TODO"""
     stats = {}
     stats["covered_distance"] = round(
         sum([format_value("distance", activity["distance"]) for activity in data]), 2
