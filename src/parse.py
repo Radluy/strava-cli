@@ -121,7 +121,7 @@ Available activity types: {[act.value for act in ActivityType]}""",
     basic_group.add_argument('--sortby', type=str,
                              help="Sort by specific attribute and order: "
                                   "'attribute_name:[desc/asc]'")
-    basic_group.add_argument('--weekly', default=False, action='store_true',
+    basic_group.add_argument('--weekly', type=int,
                              help="Print weekly statistics")
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-dis', '--distance', type=str, nargs='*', action='extend',
@@ -176,7 +176,7 @@ def main():
         data = data[0:args.limit]
 
     if args.weekly:
-        weekly_table(data)
+        weekly_table(data, args.weekly)
     else:
         pprint(data)
 
