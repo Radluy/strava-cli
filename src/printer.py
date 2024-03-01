@@ -36,7 +36,8 @@ def weekly_table(data, num_weeks=4):
     ranges = generate_weekly_ranges(num_weeks)
     stats = weekly_stats(data, num_weeks)
 
-    table = Table(show_header=True, header_style="bold", show_lines=True, row_styles=["dim", ""])
+    table = Table(show_header=True, header_style=f"bold {SECOND_COLOR}",
+                  show_lines=True, row_styles=["dim", ""])
     table.add_column("Week")
     table.add_column("Moving time")
     table.add_column("Distance")
