@@ -68,10 +68,6 @@ Show activities that took less than 30min.
 ```shell
 strava-cli --moving_time '< 0:30:00'
 ```
-Show activities that took less than 30min.  
-```shell
-strava-cli --moving_time '< 0:30:00'
-```
 
 ### Sorting
 Resulting activities can also be sorted, by specifying attribute and order as 'attribute_name:[desc/asc]'.
