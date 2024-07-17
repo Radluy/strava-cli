@@ -1,8 +1,9 @@
 from src import ActivityType, Attribute
 from src.authorize import authorize
+from src.commands import list_gear
 from src.get_data import download
 from src.load_activities import load
-from src.printer import pprint, weekly_table
+from src.printer import pprint, weekly_table, print_gears
 from src.utils import pace_from_string, strip_accents, \
     format_value, timedelta_from_string, add_pace_attribute
 
@@ -110,6 +111,7 @@ Available activity types: {[act.value for act in ActivityType]}""",
                                          help="Available subcommands")
     subparser.add_parser("authorize", help="Authorize app to access data")
     subparser.add_parser("download", help="Download activity data")
+    subparser.add_parser("list-gear", help="List bikes and shoes of authenticated user")
     basic_group = argparser.add_argument_group('Basic filters')
     basic_group.add_argument('--name', type=str,
                              help='filter by keywords present in activity name')
@@ -149,6 +151,10 @@ def main():
         return
     elif args.subcommand == 'download':
         download()
+        return
+    elif args.subcommand == 'list-gear':
+        bikes, shoes = list_gear()
+        print_gears(bikes, shoes)
         return
 
     data = load()

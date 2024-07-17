@@ -61,5 +61,12 @@ def download():
     print("Download successful")
 
 
+def get_user():
+    access_token = get_access_token()
+    response = requests.get(url='https://www.strava.com/api/v3/athlete/',
+                            headers={'Authorization': f"Bearer {access_token['access_token']}"})
+    return response.json()
+
+
 if __name__ == '__main__':
     download()

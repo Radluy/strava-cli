@@ -77,3 +77,21 @@ def pprint(data):
         console.print(url)
         console.print(*stats, highlight=False, sep='\n')
         console.print('\n')
+
+
+def print_gears(bikes, shoes):
+    table = Table(show_header=True, header_style=f"bold {SECOND_COLOR}",
+                  show_lines=True, row_styles=["dim", ""])
+    table.add_column("Bike")
+    table.add_column("Covered distance")
+    for bike in bikes:
+        table.add_row(bike['name'], f"{bike['converted_distance']} km")
+    console.print(table)
+
+    table = Table(show_header=True, header_style=f"bold {SECOND_COLOR}",
+                  show_lines=True, row_styles=["dim", ""])
+    table.add_column("Shoes")
+    table.add_column("Covered distance")
+    for shoe in shoes:
+        table.add_row(shoe['name'], f"{shoe['converted_distance']} km")
+    console.print(table)

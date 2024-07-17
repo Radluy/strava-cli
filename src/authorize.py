@@ -49,7 +49,7 @@ def authorize():
     print("Please open this link and authorize the app to access your strava data:")
     print(f"http://www.strava.com/oauth/authorize?client_id={conf['client_id']}"
           "&response_type=code&redirect_uri=http://localhost:8080&approval_prompt=force"
-          "&scope=activity:read_all")
+          "&scope=activity:read_all,profile:read_all")
 
     while True:
         client_socket, client_address = server_socket.accept()
