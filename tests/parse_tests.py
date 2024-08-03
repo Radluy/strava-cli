@@ -72,29 +72,29 @@ class TestFilterActivityTypes(unittest.TestCase):
 class TestMatchName(unittest.TestCase):
     def test_incorrect_name(self):
         data = load_example_data()
-        filtered_data = parse.match_name(data, 'random_name')
+        filtered_data = parse.match_field(data, 'random_name', 'name')
         self.assertEqual(filtered_data, [])
 
     def test_match_exact_name(self):
         data = load_example_data()
-        filtered_data = parse.match_name(data, 'Bondcliff')
+        filtered_data = parse.match_field(data, 'Bondcliff', 'name')
         self.assertEqual(len(filtered_data), 1)
         self.assertEqual(filtered_data[0]['name'], 'Bondcliff')
 
     def test_match_lowercase_name(self):
         data = load_example_data()
-        filtered_data = parse.match_name(data, 'bondcliff')
+        filtered_data = parse.match_field(data, 'bondcliff', 'name')
         self.assertEqual(len(filtered_data), 1)
         self.assertEqual(filtered_data[0]['name'], 'Bondcliff')
 
     def test_match_partial_name(self):
         data = load_example_data()
-        filtered_data = parse.match_name(data, 'happy')
+        filtered_data = parse.match_field(data, 'happy', 'name')
         self.assertEqual(len(filtered_data), 1)
         self.assertEqual(filtered_data[0]['name'], 'Happy Friday')
 
     def test_empty_data(self):
-        result = parse.match_name([], 'Bondcliff')
+        result = parse.match_field([], 'Bondcliff', 'name')
         self.assertEqual(len(result), 0)
 
 

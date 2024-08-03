@@ -90,14 +90,26 @@ def sort_by_attr(data, sort_arg):
     return data
 
 
-def match_name(data, pattern):
-    """Filter list of activities by matching a part or the whole name of activity."""
+def match_field(data, pattern, field):
+    """Filter list of activities by matching a part or the whole field of activity."""
     filtered_data = []
     for activity in data:
-        stripped_name = strip_accents(activity['name'])
-        if re.search(pattern, stripped_name, flags=re.IGNORECASE):
+        stripped = strip_accents(activity[field])
+        if re.search(pattern, stripped, flags=re.IGNORECASE):
             filtered_data.append(activity)
     return filtered_data
+
+
+def query_gear_by_name(gear_name):
+    """Query gear by name. Improved matching without accents and case.
+    Returns None if no gear found."""
+    bikes, shoes = list_gear()
+    all_gear = bikes + shoes
+    for gear in all_gear:
+        stripped_gear = strip_accents(gear['name'])
+        if re.search(gear_name, stripped_gear, flags=re.IGNORECASE):
+            return gear
+    return None
 
 
 def parse_cli_args():
@@ -125,6 +137,8 @@ Available activity types: {[act.value for act in ActivityType]}""",
                                   "'attribute_name:[desc/asc]'")
     basic_group.add_argument('--weekly', type=int,
                              help="Print weekly statistics")
+    basic_group.add_argument('--gear', type=str,
+                             help='filter by name of a gear used in the activity')
     attr_group = argparser.add_argument_group('Attribute filters')
     attr_group.add_argument('-dis', '--distance', type=str, nargs='*', action='extend',
                             help='set the distance filters[km], e.g.: \'> 90\'')
@@ -161,10 +175,16 @@ def main():
     data = add_pace_attribute(data)
 
     if args.name:
-        data = match_name(data, args.name)
+        data = match_field(data, args.name, 'name')
 
     if args.type:
         data = filter_activity_types(data, args.type)
+
+    if args.gear:
+        if gear := query_gear_by_name(args.gear):
+            data = [x for x in data if x['gear_id'] == gear['id']]
+        else:
+            data = []
 
     for attribute, filters in vars(args).items():
         # skip if filter not specified or not attribute filter [dist, elev, hr, ..]
